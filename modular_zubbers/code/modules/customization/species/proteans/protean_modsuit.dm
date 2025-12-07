@@ -11,6 +11,7 @@
 	var/obj/item/mod/control/stored_modsuit
 	var/list/cached_modules = list()
 	var/datum/mod_theme/stored_theme
+	var/mob/living/carbon/human/protean_in_suit = protean_core.linked_species.owner
 
 /datum/mod_theme/protean
 	name = "protean"
@@ -67,7 +68,7 @@
 
 /// Proteans can lock themselves on people.
 /obj/item/mod/control/pre_equipped/protean/proc/toggle_lock(forced = FALSE)
-	if(modlocked && !forced && !isprotean(wearer))
+	if(modlocked && !forced && !(protean_in_suit == mod.wearer))
 		REMOVE_TRAIT(src, TRAIT_NODROP, "protean")
 	modlocked = !modlocked
 
@@ -85,13 +86,13 @@
 		UnregisterSignal(user, COMSIG_OOC_ESCAPE)
 
 /obj/item/mod/control/pre_equipped/protean/choose_deploy(mob/user)
-	if(!isprotean(user) && modlocked && active)
+	if(!(protean_in_suit == mod.wearer) && modlocked && active)
 		balloon_alert(user, "it refuses to listen")
 		return FALSE
 	return ..()
 
 /obj/item/mod/control/pre_equipped/protean/toggle_activate(mob/user, force_deactivate)
-	if(!force_deactivate && modlocked && !isprotean(user) && active)
+	if(!force_deactivate && modlocked && !(protean_in_suit == mod.wearer) && active)
 		balloon_alert(user, "it doesn't turn off")
 		return FALSE
 	if(!active && user.has_status_effect(/datum/status_effect/protean_low_power_mode))
@@ -101,13 +102,13 @@
 	return ..()
 
 /obj/item/mod/control/pre_equipped/protean/quick_deploy(mob/user)
-	if(!isprotean(user) && modlocked && active)
+	if(!(protean_in_suit == mod.wearer) && modlocked && active)
 		balloon_alert(user, "it won't undeploy")
 		return FALSE
 	return ..()
 
 /obj/item/mod/control/pre_equipped/protean/retract(mob/user, obj/item/part, instant)
-	if(!isprotean(user) && modlocked && active && !instant)
+	if(!(protean_in_suit == mod.wearer) && modlocked && active && !instant)
 		balloon_alert(user, "that button is unresponsive")
 		return FALSE
 	return ..()
